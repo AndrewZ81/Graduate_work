@@ -6,4 +6,6 @@ class User(AbstractUser):
     """
     Переопределяем стандартную модель пользователя
     """
-    pass
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
