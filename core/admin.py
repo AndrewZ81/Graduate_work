@@ -1,9 +1,11 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+
 from .models import User
 
 
-@admin.register(User)  # Регистрируем и настраиваем таблицу пользователей в панели администратора
-class UserAdmin(admin.ModelAdmin):
+@admin.register(User)  # Регистрируем модель пользователя с собственной панелью администратора
+class CustomUserAdmin(UserAdmin):
     list_display = ["username", "email", "first_name", "last_name"]  # поля списка пользователей
     exclude = ["password"]  # не показывать пароль пользователя
     readonly_fields = ["date_joined", "last_login"]  # поля только для чтения
