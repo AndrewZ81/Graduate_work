@@ -30,7 +30,7 @@ jobs:
         run: |
           mkdir deploy
           cat docker-compose-server.yml | envsubst > deploy/docker-compose.yml
-          cat docker.env > deploy/docker.env
+          cat docker.env | envsubst > deploy/docker.env
       - name: transfer code to server
         uses: appleboy/scp-action@master
         with:
