@@ -19,6 +19,10 @@ jobs:
       DB_USER: ${{ secrets.DB_USER }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       DB_NAME: ${{ secrets.DB_NAME }}
+      SECRET_KEY: ${{ secrets.DB_SECRET_KEY }}
+      DB_ENGINE: ${{ secrets.DB_ENGINE }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
     steps:
       - name: clone code
         uses: actions/checkout@v3
@@ -33,7 +37,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           password: ${{ secrets.PASSWORD }}
-          source: "deploy/docker-compose.yml"
+          source: "deploy/docker-compose.yml,deploy/docker.env"
           target: "django-api"
           strip_components: 1
       - name: deploy app
