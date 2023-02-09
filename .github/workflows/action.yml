@@ -1,7 +1,7 @@
 name: todolist ci/cd
 on: [push]
 jobs:
-  build_and_push_project:
+  build_and_push_project:  # Создаём образ проекта и сохраняем в DockerHub
       runs-on: ubuntu-latest
       steps:
         - name: clone code
