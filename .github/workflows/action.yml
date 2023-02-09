@@ -26,13 +26,14 @@ jobs:
         run: |
           mkdir deploy
           cat docker-compose-server.yml | envsubst > deploy/docker-compose.yml
+          cat .env > deploy/.env
       - name: transfer code to server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           password: ${{ secrets.PASSWORD }}
-          source: "deploy/docker-compose.yml"
+          source: "deploy/docker-compose.yml,deploy/.env"
           target: "django-api"
           strip_components: 1
       - name: deploy app
