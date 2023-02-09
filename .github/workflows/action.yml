@@ -1,0 +1,14 @@
+name: todolist deploy
+on: [push]
+jobs:
+  build_and_push_project:
+      runs-on: ubuntu-latest
+      steps:
+        - name: clone code
+          uses: actions/checkout@v3
+        - name: docker build
+          run: docker build -t azaiko/django-api:$GITHUB_REF_NAME-$GITHUB_RUN_ID .
+        - name: docker login
+          run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        - name: docker push
+          run: docker push azaiko/django-api:$GITHUB_REF_NAME-$GITHUB_RUN_ID
