@@ -22,6 +22,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes: # Для синхронизации проекта с контейнером
+      - .env:/api/.env
     command: python manage.py migrate
   postgres:
     image: postgres:latest
