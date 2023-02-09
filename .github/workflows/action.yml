@@ -44,4 +44,3 @@ jobs:
           script: |
             cd django-api
             echo ${{ secrets.SERVER_PASSWORD}} | sudo -S docker-compose up -d
-
