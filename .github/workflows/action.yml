@@ -38,7 +38,7 @@ jobs:
       - name: deploy app
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ SERVER_NAME }}
+          host: ${{ secrets.SERVER_NAME }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
