@@ -15,15 +15,11 @@ services:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
-    volumes:  # Для синхронизации проекта с контейнером
-      - .:/api
   migrations:
     image: azaiko/django-api:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     depends_on:
       postgres:
         condition: service_healthy
-    environment:
-      SECRET_KEY: $SECRET_KEY
     command: python manage.py migrate
   postgres:
     image: postgres:latest
