@@ -1,0 +1,42 @@
+version: "3.10"
+services:
+  frontend:
+    image: sermalenk/skypro-front:lesson-34
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+  api:
+    image: azaiko/django-api:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    volumes:  # Для синхронизации проекта с контейнером
+      - .:/api
+  migrations:
+    image: azaiko/django-api:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: python manage.py migrate
+  postgres:
+    image: postgres:latest
+    user: $DB_USER
+    environment:
+      POSTGRES_USER: $DB_USER
+      POSTGRES_PASSWORD: $DB_PASSWORD
+      POSTGRES_DB: $DB_NAME
+    volumes:
+      # Для сохранения изменений в БД
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", -U postgres]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+volumes:
+  pgdata:  # Для БД
