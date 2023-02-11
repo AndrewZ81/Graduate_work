@@ -34,6 +34,7 @@ services:
         condition: service_completed_successfully
     volumes: # Для собранной статики
       - static:/api/static
+      - ./docker.env:/api/.env
     command: python manage.py collectstatic --noinput
 
   migrations:
