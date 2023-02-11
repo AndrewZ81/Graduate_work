@@ -1,6 +1,7 @@
 name: todolist ci/cd
 on: [push]
 jobs:
+
   build_and_push_project:  # Создаём образ проекта и сохраняем в DockerHub
       runs-on: ubuntu-latest
       steps:
@@ -12,6 +13,7 @@ jobs:
           run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
         - name: docker push
           run: docker push azaiko/django-api:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+
   deploy_project:  # Разворачиваем образ проекта на сервере
     runs-on: ubuntu-latest
     needs: build_and_push_project
@@ -31,13 +33,14 @@ jobs:
           mkdir deploy
           cat docker-compose-server.yml | envsubst > deploy/docker-compose.yml
           cat docker.env | envsubst > deploy/docker.env
+          cat nginx.conf > deploy/nginx.conf
       - name: transfer code to server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           password: ${{ secrets.PASSWORD }}
-          source: "deploy/docker-compose.yml,deploy/docker.env"
+          source: "deploy/docker-compose.yml,deploy/docker.env,deploy/nginx.conf"
           target: "django-api"
           strip_components: 1
       - name: deploy app

@@ -1,11 +1,16 @@
 version: "3.10"
 services:
+
   frontend:
     image: sermalenk/skypro-front:lesson-34
     ports:
-      - "8080:80"
+      - "80:80"
     depends_on:
       - api
+    volumes:
+      - static:/usr/share/nginx/static
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
   api:
     build:
       context: .
@@ -16,8 +21,23 @@ services:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
+      collecting_static:
+        condition: service_completed_successfully
     volumes:  # Для синхронизации проекта с контейнером
       - .:/api
+
+  collecting_static:
+    build:
+      context: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    command: python manage.py collectstatic --noinput
+    volumes: # Для собранной статики
+      - static:/api/static
+
   migrations:
     build:
       context: .
@@ -25,6 +45,7 @@ services:
       postgres:
         condition: service_healthy
     command: python manage.py migrate
+
   postgres:
     image: postgres:latest
     user: ${USER}
@@ -40,5 +61,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
 volumes:
   pgdata:  # Для БД
+  static:  # Для статики
