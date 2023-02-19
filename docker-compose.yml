@@ -19,7 +19,7 @@ services:
       migrations:
         condition: service_completed_successfully
     volumes:  # Для синхронизации изменений в проекте с контейнером
-      - .:/api
+      - ./:/api
 
   migrations:  # Применение миграций
     build:
