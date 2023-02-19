@@ -47,7 +47,7 @@ class LoginSerializer(serializers.ModelSerializer):
     """
     Осуществляет аутентификацию пользователя
     """
-    username = serializers.CharField(write_only=True)
+    username = serializers.CharField()
     password = PasswordField(write_only=True)
 
     class Meta:

@@ -25,6 +25,8 @@ jobs:
       DB_ENGINE: ${{ secrets.DB_ENGINE }}
       DB_HOST: ${{ secrets.DB_HOST }}
       DB_PORT: ${{ secrets.DB_PORT }}
+      VK_ID: ${{ secrets.VK_ID }}
+      VK_KEY: ${{ secrets.VK_KEY }}
     steps:
       - name: clone code
         uses: actions/checkout@v3

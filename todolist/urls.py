@@ -6,12 +6,13 @@ from todolist import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('core/', include(("core.urls", 'core'))),  # Маршруты приложения 'core'
+    path('core/', include(('core.urls', 'core'))),  # Маршруты приложения 'core'
 
     # Маршруты для схем OpenAPI 3 приложения 'core'
-    path('core/schema/', SpectacularAPIView.as_view(), name="schema"),
-    path('core/schema/redoc/', SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
-    path('core/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path('core/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('core/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('core/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('oauth/', include('social_django.urls', namespace='social'))
 ]
 
 # Создаём маршруты для облегчения тестирования
