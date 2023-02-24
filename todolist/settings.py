@@ -43,9 +43,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'social_django',
     'drf_spectacular',
+    'django_filters',
 
     # Пользовательские приложения
     'core',
+    'goals',
     ]
 
 MIDDLEWARE = [
