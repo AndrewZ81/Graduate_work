@@ -25,7 +25,6 @@ class GoalCategoryListView(generics.ListAPIView):
     """
     permission_classes: list = [permissions.IsAuthenticated]
     serializer_class = GoalCategorySerializer
-    pagination_class = LimitOffsetPagination
 
     filter_backends: list = [filters.OrderingFilter, filters.SearchFilter]
     ordering_fields: list = ["title", "created"]  # Позволяет сортировать категории по названию и дате создания
@@ -74,7 +73,6 @@ class GoalListView(generics.ListAPIView):
     """
     permission_classes: list = [permissions.IsAuthenticated]
     serializer_class = GoalSerializer
-    pagination_class = LimitOffsetPagination
 
     filter_backends: list = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
     filterset_class = GoalDateFilter
@@ -122,7 +120,6 @@ class GoalCommentListView(generics.ListAPIView):
     """
     permission_classes: list = [permissions.IsAuthenticated]
     serializer_class = GoalCommentSerializer
-    pagination_class = LimitOffsetPagination
 
     filter_backends: list = [filters.OrderingFilter, filters.SearchFilter]
     ordering_fields: list = ["created"]  # Позволяет сортировать комментарии по дате создания
