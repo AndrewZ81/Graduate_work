@@ -127,7 +127,7 @@ class GoalCommentListView(generics.ListAPIView):
     filter_backends: list = [filters.OrderingFilter, filters.SearchFilter]
     ordering_fields: list = ["created"]  # Позволяет сортировать комментарии по дате создания
     ordering: str = "-created"  # По умолчанию устанавливает сортировку комментариев по дате создания (убывающе)
-    search_fields: dict = ["goal__title"]  # Позволяет искать комментарии по названию цели
+    # search_fields: dict = ["goal__title"]  # Позволяет искать комментарии по названию цели
 
     def get_queryset(self):
         return GoalComment.objects.filter(goal__user=self.request.user)
