@@ -124,10 +124,10 @@ class GoalCommentListView(generics.ListAPIView):
     serializer_class = GoalCommentSerializer
     pagination_class = LimitOffsetPagination
 
-    filter_backends: list = [filters.OrderingFilter, filters.SearchFilter]
+    filter_backends: list = [filters.OrderingFilter, DjangoFilterBackend]
     ordering_fields: list = ["created"]  # Позволяет сортировать комментарии по дате создания
     ordering: str = "-created"  # По умолчанию устанавливает сортировку комментариев по дате создания (убывающе)
-    # search_fields: dict = ["goal__title"]  # Позволяет искать комментарии по названию цели
+    filterset_fields: dict = ["goal__title"]  # Позволяет фильтровать комментарии по названию их цели
 
     def get_queryset(self):
         return GoalComment.objects.filter(goal__user=self.request.user)
