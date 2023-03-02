@@ -1,24 +1,44 @@
 from django.contrib import admin
 
-from .models import GoalCategory, Goal, GoalComment
+from .models import GoalCategory, Goal, GoalComment, Board
 
 
-@admin.register(GoalCategory)  # Регистрируем модель категорий с собственной панелью администратора
+# Регистрируем модели с собственными панелями администратора
+@admin.register(Board)
+class BoardAdmin(admin.ModelAdmin):
+    """
+    Модель общей доски целей
+    """
+    list_display = ["title", "created", "updated"]
+    search_fields = ["title"]
+    search_help_text = "Поиск по названию общей доски целей"
+
+
+@admin.register(GoalCategory)
 class GoalCategoryAdmin(admin.ModelAdmin):
-    list_display = ["title", "user", "created", "updated"]   # поля списка категорий
-    search_fields = ["title"]  # поиск по полям
-    search_help_text = "Поиск по названию"  # подсказка поиска
+    """
+    Модель категорий
+    """
+    list_display = ["title", "user", "created", "updated"]
+    search_fields = ["title"]
+    search_help_text = "Поиск по названию категории"
 
 
-@admin.register(Goal)  # Регистрируем модель целей с собственной панелью администратора
+@admin.register(Goal)
 class GoalAdmin(admin.ModelAdmin):
-    list_display = ["title", "description", "created", "updated"]   # поля списка целей
-    search_fields = ["title", "description"]  # поиск по полям
-    search_help_text = "Поиск по названию или описанию"  # подсказка поиска
+    """
+    Модель цели
+    """
+    list_display = ["title", "description", "created", "updated"]
+    search_fields = ["title", "description"]
+    search_help_text = "Поиск по названию/описанию цели"
 
 
-@admin.register(GoalComment)  # Регистрируем модель комментариев с собственной панелью администратора
+@admin.register(GoalComment)
 class GoalCommentAdmin(admin.ModelAdmin):
-    list_display = ["text", "goal", "created", "updated"]   # поля списка комментариев
-    search_fields = ["text"]  # поиск по полям
-    search_help_text = "Поиск по тексту"  # подсказка поиска
+    """
+    Модель комментария цели
+    """
+    list_display = ["text", "goal", "created", "updated"]
+    search_fields = ["text"]
+    search_help_text = "Поиск по тексту комментария цели"

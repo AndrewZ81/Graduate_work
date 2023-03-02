@@ -5,26 +5,70 @@ from core.models import User
 
 class DatesModelMixin(models.Model):
     """
-    Создаёт базовую модель для сохранения дат создания/последнего обновления объектов
+    Базовая модель дат создания/последнего обновления объектов
     """
     class Meta:
-        abstract = True  # Помечаем класс как абстрактный – для него не будет таблички в БД
+        abstract = True  # Отключает создание таблицы БД для этой модели
 
     created = models.DateTimeField(verbose_name="Дата создания", auto_now_add=True)
     updated = models.DateTimeField(verbose_name="Дата последнего обновления", auto_now=True)
 
 
+class Board(DatesModelMixin):
+    """
+    Модель общей доски целей
+    """
+    class Meta:
+        verbose_name = "Общая доска целей"
+        verbose_name_plural = "Общие доски целей"
+
+    title = models.CharField(verbose_name="Название", max_length=255)
+    is_deleted = models.BooleanField(verbose_name="Удалена", default=False)
+
+
+class Role(models.IntegerChoices):
+    """
+    Описывает набор возможных значений для поля 'role' класса 'BoardParticipant'
+    """
+    owner = 1, "Владелец"
+    writer = 2, "Редактор"
+    reader = 3, "Читатель"
+
+
+class BoardParticipant(DatesModelMixin):
+    """
+    Модель участника общей доски целей
+    """
+    class Meta:
+        unique_together = ("board", "user")
+        verbose_name = "Участник"
+        verbose_name_plural = "Участники"
+
+    board = models.ForeignKey(
+        Board, verbose_name="Доска", on_delete=models.PROTECT, related_name="participants"
+    )
+    user = models.ForeignKey(
+        User, verbose_name="Пользователь", on_delete=models.PROTECT, related_name="participants"
+    )
+    role = models.PositiveSmallIntegerField(
+        verbose_name="Роль", choices=Role.choices, default=Role.owner
+    )
+
+
 class GoalCategory(DatesModelMixin):
     """
-    Создаёт модель для категорий
+    Модель категории
     """
     class Meta:
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.title
 
+    board = models.ForeignKey(
+        Board, verbose_name="Доска", on_delete=models.PROTECT, related_name="categories"
+    )
     title = models.CharField(verbose_name="Название", max_length=255)
     user = models.ForeignKey(User, verbose_name="Автор", on_delete=models.PROTECT)
     is_deleted = models.BooleanField(verbose_name="Удалена", default=False)
@@ -32,7 +76,7 @@ class GoalCategory(DatesModelMixin):
 
 class Status(models.IntegerChoices):
     """
-    Создаёт набор возможных значений для поля 'status' класса 'Goal'
+    Описывает набор возможных значений для поля 'status' класса 'Goal'
     """
     to_do = 1, "К выполнению"
     in_progress = 2, "В процессе"
@@ -42,7 +86,7 @@ class Status(models.IntegerChoices):
 
 class Priority(models.IntegerChoices):
     """
-    Создаёт набор возможных значений для поля 'priority' класса 'Goal'
+    Описывает набор возможных значений для поля 'priority' класса 'Goal'
     """
     low = 1, "Низкий"
     medium = 2, "Средний"
@@ -52,13 +96,13 @@ class Priority(models.IntegerChoices):
 
 class Goal(DatesModelMixin):
     """
-    Создаёт модель для целей
+    Модель цели
     """
     class Meta:
         verbose_name = "Цель"
         verbose_name_plural = "Цели"
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.title
 
     title = models.CharField(verbose_name="Название", max_length=255)
@@ -78,13 +122,13 @@ class Goal(DatesModelMixin):
 
 class GoalComment(DatesModelMixin):
     """
-    Создаёт комментарий для цели
+    Модель комментария цели
     """
     class Meta:
         verbose_name = "Комментарий"
         verbose_name_plural = "Комментарии"
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.text
 
     text = models.TextField(verbose_name="Текст")
