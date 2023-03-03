@@ -8,7 +8,12 @@
 #### В дипломной работе используются:
 * python v.3.10
 * django v.4.1.6
+* django-environ v.0.9.0
 * psycopg2 v.2.9.5
+* djangorestframework v.3.14.0
+* drf-spectacular = v.0.25.1
+* social-auth-app-django v.5.0.0
+* django-filter v.22.1
 
 #### Особенности дипломной работы:
 * Приложение конфигурируется с помощью переменных окружения.

@@ -40,10 +40,18 @@ class BoardParticipantSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(slug_field="username", queryset=User.objects.all())
 
 
-class BoardSerializer(serializers.ModelSerializer):
+class BoardListSerializer(serializers.ModelSerializer):
     """
     Отображает список общих досок целей текущего пользователя
-    Для запрашиваемой общей доски цели текущего пользователя:
+    """
+    class Meta:
+        model = Board
+        fields = "__all__"
+
+
+class BoardSerializer(serializers.ModelSerializer):
+    """
+    Для запрашиваемой активной общей доски цели текущего пользователя:
     - выводит подробную информацию
     - редактирует содержимое
     - делает неактивной (скрывает)

@@ -9,7 +9,9 @@ from .filters import GoalDateFilter
 from .models import GoalCategory, Goal, Status, GoalComment, Board
 from .serializers import \
     GoalCategoryCreateSerializer, GoalCategorySerializer, GoalCreateSerializer, GoalSerializer, \
-    GoalCommentCreateSerializer, GoalCommentSerializer, BoardCreateSerializer, BoardSerializer
+    GoalCommentCreateSerializer, GoalCommentSerializer, BoardCreateSerializer, BoardSerializer, \
+    BoardListSerializer
+from .permissions import BoardPermissions
 
 
 class BoardCreateView(generics.CreateAPIView):
@@ -25,7 +27,7 @@ class BoardListView(generics.ListAPIView):
     Обрабатывает запрос на отображение списка активных общих досок целей текущего пользователя
     """
     permission_classes: list = [permissions.IsAuthenticated]
-    serializer_class: Serializer = BoardSerializer
+    serializer_class: Serializer = BoardListSerializer
     pagination_class: BasePagination = LimitOffsetPagination
 
     filter_backends: list = [filters.OrderingFilter, filters.SearchFilter]
@@ -35,6 +37,29 @@ class BoardListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Board.objects.filter(participants__user=self.request.user, is_deleted=False)
+
+
+class BoardView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Для запрашиваемой активной общей доски цели текущего пользователя:
+    - выводит подробную информацию
+    - редактирует содержимое
+    - делает неактивной (скрывает)
+    """
+    model = Board
+    serializer_class: Serializer = BoardSerializer
+    permission_classes: list = [permissions.IsAuthenticated, BoardPermissions]
+
+    def get_queryset(self):
+        return Board.objects.filter(participants__user=self.request.user, is_deleted=False)
+
+    def perform_destroy(self, instance: Board):
+        with transaction.atomic():
+            instance.is_deleted = True
+            instance.save()
+            instance.categories.update(is_deleted=True)
+            Goal.objects.filter(category__board=instance).update(status=Status.archived)
+        return instance
 
 
 class GoalCategoryCreateView(generics.CreateAPIView):
