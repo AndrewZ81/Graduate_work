@@ -1,5 +1,4 @@
 from rest_framework import generics, permissions
-from rest_framework.pagination import LimitOffsetPagination, BasePagination
 from rest_framework.serializers import Serializer
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
@@ -11,7 +10,8 @@ from .serializers import \
     GoalCategoryCreateSerializer, GoalCategorySerializer, GoalCreateSerializer, GoalSerializer, \
     GoalCommentCreateSerializer, GoalCommentSerializer, BoardCreateSerializer, BoardSerializer, \
     BoardListSerializer
-from .permissions import BoardPermissions
+from .permissions import BoardPermissions, GoalCategoryPermissions, GoalPermissions, \
+    GoalCommentPermissions
 
 
 class BoardCreateView(generics.CreateAPIView):
@@ -24,16 +24,15 @@ class BoardCreateView(generics.CreateAPIView):
 
 class BoardListView(generics.ListAPIView):
     """
-    Обрабатывает запрос на отображение списка активных общих досок целей текущего пользователя
+    Обрабатывает запрос на отображение списка общих досок целей текущего пользователя
+    Поддерживает сортировку по названию
     """
-    permission_classes: list = [permissions.IsAuthenticated]
+    permission_classes: list = [BoardPermissions]
     serializer_class: Serializer = BoardListSerializer
-    pagination_class: BasePagination = LimitOffsetPagination
 
-    filter_backends: list = [filters.OrderingFilter, filters.SearchFilter]
-    ordering_fields: list = ["title", "created"]  # Позволяет сортировать общие доски целей по названию и дате создания
-    ordering: str = "title"  # По умолчанию устанавливает сортировку по названию
-    search_fields: list = ["title"]  # Позволяет искать общие доски целей по названию
+    filter_backends: list = [filters.OrderingFilter]
+    ordering_fields: list = ["title"]
+    ordering: str = "title"
 
     def get_queryset(self):
         return Board.objects.filter(participants__user=self.request.user, is_deleted=False)
@@ -46,12 +45,11 @@ class BoardView(generics.RetrieveUpdateDestroyAPIView):
     - редактирует содержимое
     - делает неактивной (скрывает)
     """
-    model = Board
     serializer_class: Serializer = BoardSerializer
-    permission_classes: list = [permissions.IsAuthenticated, BoardPermissions]
+    permission_classes: list = [BoardPermissions]
 
     def get_queryset(self):
-        return Board.objects.filter(participants__user=self.request.user, is_deleted=False)
+        return Board.objects.filter(is_deleted=False)
 
     def perform_destroy(self, instance: Board):
         with transaction.atomic():
@@ -66,27 +64,28 @@ class GoalCategoryCreateView(generics.CreateAPIView):
     """
     Обрабатывает запрос на создание категории текущему пользователю
     """
-    permission_classes: list = [permissions.IsAuthenticated]
+    permission_classes: list = [GoalCategoryPermissions]
     serializer_class: Serializer = GoalCategoryCreateSerializer
 
 
 class GoalCategoryListView(generics.ListAPIView):
     """
-    Обрабатывает запрос на отображение списка активных категорий текущего пользователя
+    Обрабатывает запрос на отображение списка категорий текущего пользователя
+    Поддерживает сортировку по названию и дате создания, поиск по названию и
+    фильтрацию по названию общей доски целей
     """
-    permission_classes: list = [permissions.IsAuthenticated]
+    permission_classes: list = [GoalCategoryPermissions]
     serializer_class: Serializer = GoalCategorySerializer
-    pagination_class: BasePagination = LimitOffsetPagination
 
-    filter_backends: list = [filters.OrderingFilter, filters.SearchFilter]
-    ordering_fields: list = ["title", "created"]  # Позволяет сортировать категории по названию и дате создания
-    ordering: str = "title"  # По умолчанию устанавливает сортировку категорий по названию
-    search_fields: list = ["title"]  # Позволяет искать категории по названию
+    filter_backends: list = [filters.OrderingFilter, filters.SearchFilter, DjangoFilterBackend]
+    ordering_fields: list = ["title", "created"]
+    ordering: str = "title"
+    search_fields: list = ["title"]
+    filterset_fields: list = ["board__title"]
 
     def get_queryset(self):
         return GoalCategory.objects.filter(
-            user=self.request.user, is_deleted=False
-        )
+            board__participants__user=self.request.user, is_deleted=False)
 
 
 class GoalCategoryView(generics.RetrieveUpdateDestroyAPIView):
@@ -97,12 +96,11 @@ class GoalCategoryView(generics.RetrieveUpdateDestroyAPIView):
     - делает неактивной (скрывает)
     """
     serializer_class: Serializer = GoalCategorySerializer
-    permission_classes: list = [permissions.IsAuthenticated]
+    permission_classes: list = [GoalCategoryPermissions]
 
     def get_queryset(self):
         return GoalCategory.objects.filter(
-            user=self.request.user, is_deleted=False
-        )
+            board__participants__user=self.request.user, is_deleted=False)
 
     def perform_destroy(self, instance: GoalCategory):
         with transaction.atomic():
@@ -115,27 +113,29 @@ class GoalCreateView(generics.CreateAPIView):
     """
     Обрабатывает запрос на создание цели текущему пользователю
     """
-    permission_classes: list = [permissions.IsAuthenticated]
+    permission_classes: list = [GoalPermissions]
     serializer_class: Serializer = GoalCreateSerializer
 
 
 class GoalListView(generics.ListAPIView):
     """
     Обрабатывает запрос на отображение списка целей текущего пользователя
+    Поддерживает сортировку по названию и дате создания, поиск по названию и описанию,
+    фильтрацию по категории, статусу, приоритету и дате
     """
-    permission_classes: list = [permissions.IsAuthenticated]
+    permission_classes: list = [GoalPermissions]
     serializer_class: Serializer = GoalSerializer
-    pagination_class: BasePagination = LimitOffsetPagination
 
     filter_backends: list = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
     filterset_class: FilterSet = GoalDateFilter
-    ordering_fields: list = ["title", "created"]  # Позволяет сортировать цели по названию и дате создания
-    ordering: str = "title"  # По умолчанию устанавливает сортировку по названию
-    search_fields: list = ["title", "description"]  # Позволяет искать цели по названию и описанию
+    ordering_fields: list = ["title", "created"]
+    ordering: str = "title"
+    search_fields: list = ["title", "description"]
 
     def get_queryset(self):
         return Goal.objects.filter(
-            user=self.request.user, category__is_deleted=False
+            category__board__participants__user=self.request.user,
+            category__is_deleted=False
         ).exclude(status=Status.archived)
 
 
@@ -147,11 +147,12 @@ class GoalView(generics.RetrieveUpdateDestroyAPIView):
     - архивирует (скрывает)
     """
     serializer_class: Serializer = GoalSerializer
-    permission_classes: list = [permissions.IsAuthenticated]
+    permission_classes: list = [GoalPermissions]
 
     def get_queryset(self):
         return Goal.objects.filter(
-            user=self.request.user, category__is_deleted=False
+            category__board__participants__user=self.request.user,
+            category__is_deleted=False
         ).exclude(status=Status.archived)
 
     def perform_destroy(self, instance: Goal):
@@ -163,25 +164,27 @@ class GoalCommentCreateView(generics.CreateAPIView):
     """
     Обрабатывает запрос на создание комментария текущей цели
     """
-    permission_classes: list = [permissions.IsAuthenticated]
+    permission_classes: list = [GoalCommentPermissions]
     serializer_class: Serializer = GoalCommentCreateSerializer
 
 
 class GoalCommentListView(generics.ListAPIView):
     """
     Обрабатывает запрос на отображение списка комментариев текущего пользователя
+    Поддерживает сортировку по дате создания и фильтрацию по названию цели
     """
-    permission_classes: list = [permissions.IsAuthenticated]
+    permission_classes: list = [GoalCommentPermissions]
     serializer_class: Serializer = GoalCommentSerializer
-    pagination_class: BasePagination = LimitOffsetPagination
 
     filter_backends: list = [filters.OrderingFilter, DjangoFilterBackend]
-    ordering_fields: list = ["created"]  # Позволяет сортировать комментарии по дате создания
-    ordering: str = "-created"  # По умолчанию устанавливает сортировку комментариев по дате создания (убывающе)
-    filterset_fields: list = ["goal__title"]  # Позволяет фильтровать комментарии по названию их цели
+    ordering_fields: list = ["created"]
+    ordering: str = "-created"
+    filterset_fields: list = ["goal__title"]
 
     def get_queryset(self):
-        return GoalComment.objects.filter(goal__user=self.request.user)
+        return GoalComment.objects.filter(
+            goal__category__board__participants__user=self.request.user
+        )
 
 
 class GoalCommentView(generics.RetrieveUpdateDestroyAPIView):
@@ -192,7 +195,7 @@ class GoalCommentView(generics.RetrieveUpdateDestroyAPIView):
     - удаляет
     """
     serializer_class: Serializer = GoalCommentSerializer
-    permission_classes: list = [permissions.IsAuthenticated]
+    permission_classes: list = [GoalCommentPermissions]
 
     def get_queryset(self):
         return GoalComment.objects.filter(goal__user=self.request.user)
