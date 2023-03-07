@@ -180,6 +180,10 @@ class GoalSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "created", "updated", "user")
         fields = "__all__"
 
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=GoalCategory.objects.filter(is_deleted=False)
+    )
+
     def validate_category(self, value: GoalCategory) -> GoalCategory:
         if value.user != self.context["request"].user:
             raise PermissionDenied

@@ -16,7 +16,7 @@ from .permissions import BoardPermissions, GoalCategoryPermissions, GoalPermissi
 
 class BoardCreateView(generics.CreateAPIView):
     """
-    Обрабатывает запрос на создание общей доски целей текущему пользователю
+    Обрабатывает запрос на создание общей доски целей текущему пользователю.
     """
     permission_classes: list = [permissions.IsAuthenticated]
     serializer_class: Serializer = BoardCreateSerializer
@@ -24,8 +24,8 @@ class BoardCreateView(generics.CreateAPIView):
 
 class BoardListView(generics.ListAPIView):
     """
-    Обрабатывает запрос на отображение списка общих досок целей текущего пользователя
-    Поддерживает сортировку по названию
+    Обрабатывает запрос на отображение списка общих досок целей текущего пользователя.
+    Поддерживает сортировку по названию.
     """
     permission_classes: list = [BoardPermissions]
     serializer_class: Serializer = BoardListSerializer
@@ -35,15 +35,18 @@ class BoardListView(generics.ListAPIView):
     ordering: str = "title"
 
     def get_queryset(self):
+        """
+        Исключает удалённые общие доски целей.
+        """
         return Board.objects.filter(participants__user=self.request.user, is_deleted=False)
 
 
 class BoardView(generics.RetrieveUpdateDestroyAPIView):
     """
-    Для запрашиваемой активной общей доски цели текущего пользователя:
-    - выводит подробную информацию
-    - редактирует содержимое
-    - делает неактивной (скрывает)
+    Для запрашиваемой общей доски целей текущего пользователя:
+    - выводит подробную информацию.
+    - редактирует содержимое.
+    - делает неактивной (скрывает).
     """
     serializer_class: Serializer = BoardSerializer
     permission_classes: list = [BoardPermissions]
@@ -52,17 +55,20 @@ class BoardView(generics.RetrieveUpdateDestroyAPIView):
         return Board.objects.filter(is_deleted=False)
 
     def perform_destroy(self, instance: Board):
+        """
+        Помечет удаленной общую доску целей и связанные с ней категории.
+        Помечает архивными связанные с ней цели.
+        """
         with transaction.atomic():
             instance.is_deleted = True
             instance.save()
             instance.categories.update(is_deleted=True)
             Goal.objects.filter(category__board=instance).update(status=Status.archived)
-        return instance
 
 
 class GoalCategoryCreateView(generics.CreateAPIView):
     """
-    Обрабатывает запрос на создание категории текущему пользователю
+    Обрабатывает запрос на создание категории текущему пользователю.
     """
     permission_classes: list = [GoalCategoryPermissions]
     serializer_class: Serializer = GoalCategoryCreateSerializer
@@ -81,16 +87,22 @@ class GoalCategoryListView(generics.ListAPIView):
     ordering_fields: list = ["title", "created"]
     ordering: str = "title"
     search_fields: list = ["title"]
-    filterset_fields: list = ["board__title"]
+    filterset_fields: list = ["board"]
 
     def get_queryset(self):
+        """
+        Исключает:
+        - удалённые категории.
+        - категории, в досках которых текущий пользователь не является участником.
+        """
         return GoalCategory.objects.filter(
-            board__participants__user=self.request.user, is_deleted=False)
+            board__participants__user=self.request.user, is_deleted=False
+        )
 
 
 class GoalCategoryView(generics.RetrieveUpdateDestroyAPIView):
     """
-    Для запрашиваемой активной категории текущего пользователя:
+    Для запрашиваемой категории текущего пользователя:
     - выводит подробную информацию
     - редактирует содержимое
     - делает неактивной (скрывает)
@@ -100,12 +112,17 @@ class GoalCategoryView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return GoalCategory.objects.filter(
-            board__participants__user=self.request.user, is_deleted=False)
+            board__participants__user=self.request.user, is_deleted=False
+        )
 
     def perform_destroy(self, instance: GoalCategory):
+        """
+        Помечет категорию удалённой.
+        Помечает архивными связанные с ней цели.
+        """
         with transaction.atomic():
             instance.is_deleted = True
-            instance.save(update_fields=('is_deleted', ))
+            instance.save(update_fields=('is_deleted',))
             instance.goals.update(status=Status.archived)
 
 
@@ -133,6 +150,12 @@ class GoalListView(generics.ListAPIView):
     search_fields: list = ["title", "description"]
 
     def get_queryset(self):
+        """
+        Исключает:
+        - удалённые категории.
+        - цели категорий, в досках которых текущий пользователь не является участником.
+        - архивные цели
+        """
         return Goal.objects.filter(
             category__board__participants__user=self.request.user,
             category__is_deleted=False
@@ -157,7 +180,7 @@ class GoalView(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_destroy(self, instance: Goal):
         instance.status = Status.archived
-        instance.save(update_fields=('status', ))
+        instance.save(update_fields=('status',))
 
 
 class GoalCommentCreateView(generics.CreateAPIView):
@@ -179,9 +202,13 @@ class GoalCommentListView(generics.ListAPIView):
     filter_backends: list = [filters.OrderingFilter, DjangoFilterBackend]
     ordering_fields: list = ["created"]
     ordering: str = "-created"
-    filterset_fields: list = ["goal__title"]
+    filterset_fields: list = ["goal"]
 
     def get_queryset(self):
+        """
+        Исключает комментарии целей категорий,
+        в досках которых текущий пользователь не является участником.
+        """
         return GoalComment.objects.filter(
             goal__category__board__participants__user=self.request.user
         )
