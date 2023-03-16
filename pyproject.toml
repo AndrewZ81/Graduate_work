@@ -15,6 +15,8 @@ djangorestframework = "^3.14.0"
 drf-spectacular = "^0.25.1"
 social-auth-app-django = "^5.0.0"
 django-filter = "^22.1"
+pydantic = "^1.10.6"
+accessify = "^0.3.1"
 
 
 [build-system]

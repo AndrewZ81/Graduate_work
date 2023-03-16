@@ -2,11 +2,12 @@ version: "3.10"
 services:
 
   frontend:  # Frontend-часть
-    image: sermalenk/skypro-front:lesson-37
+    image: sermalenk/skypro-front:lesson-38
     ports:
       - "80:80"
     depends_on:
       - api
+      - bot
 
   api:  # Backend-часть
     build:
@@ -18,7 +19,20 @@ services:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
-    volumes:  # Для синхронизации изменений в проекте с контейнером
+    volumes:
+      - ./:/api
+
+  bot:  # Бот Телеграм
+    build:
+      context: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    command: python manage.py runbot
+    restart: on-failure
+    volumes:
       - ./:/api
 
   migrations:  # Применение миграций

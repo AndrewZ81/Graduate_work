@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     # Пользовательские приложения
     'core',
     'goals',
+    'bot',
     ]
 
 MIDDLEWARE = [
@@ -167,3 +168,5 @@ SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
 SOCIAL_AUTH_LOGIN_ERROR_URL = '/login-error/'
 
 SOCIAL_AUTH_USER_MODEL = 'core.User'
+
+BOT_TOKEN = env.str('BOT_TOKEN')

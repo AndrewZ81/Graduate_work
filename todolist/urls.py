@@ -8,6 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('core/', include(('core.urls', 'core'))),  # Маршруты приложения 'core'
     path('goals/', include(('goals.urls', 'goals'))),  # Маршруты приложения 'goals'
+    path('bot/', include(('bot.urls', 'gbot'))),  # Маршруты приложения 'bot'
 
     # Маршруты для схем OpenAPI 3 приложения 'core'
     path('core/schema/', SpectacularAPIView.as_view(), name='schema'),
