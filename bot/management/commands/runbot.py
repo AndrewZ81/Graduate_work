@@ -153,7 +153,7 @@ class Command(BaseCommand):
                     self.tg_client.send_message(
                         chat_id=msg.chat.id,
                         text=f"Цель '{item.message.text}' создана. Вот ссылка на неё:\n"
-                             f"http://127.0.0.1/boards/{category.board.id}/"
+                             f"http://andrewzaiko.ga/boards/{category.board.id}/"
                              f"categories/{category.id}/goals?goal={goal.id}"
                     )
                 flag = False
