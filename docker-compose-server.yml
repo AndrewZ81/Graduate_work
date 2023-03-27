@@ -31,8 +31,6 @@ services:
 
   test:  # Тесты
     image: azaiko/django-api:$GITHUB_REF_NAME-$GITHUB_RUN_ID
-    ports:
-      - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -40,8 +38,9 @@ services:
         condition: service_completed_successfully
       collecting_static:
         condition: service_completed_successfully
-
     command: pytest
+    volumes:
+      - ./docker.env:/api/.env
 
   bot: # Бот Телеграм
     image: azaiko/django-api:$GITHUB_REF_NAME-$GITHUB_RUN_ID
