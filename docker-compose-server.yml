@@ -38,6 +38,9 @@ services:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
+      collecting_static:
+        condition: service_completed_successfully
+
     command: pytest
 
   bot: # Бот Телеграм
@@ -46,6 +49,10 @@ services:
       postgres:
         condition: service_healthy
       migrations:
+        condition: service_completed_successfully
+      collecting_static:
+        condition: service_completed_successfully
+      test:
         condition: service_completed_successfully
     command: python manage.py runbot
     restart: on-failure
