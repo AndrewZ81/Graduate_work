@@ -7,7 +7,7 @@ services:
       - "80:80"
     depends_on:
       - api
-      - bot
+#      - bot
 
   api:  # Backend-часть
     build:
@@ -19,23 +19,38 @@ services:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
+      test:
+        condition: service_completed_successfully
     volumes:
       - ./:/api
 
-  bot:  # Бот Телеграм
+  test:  # Тесты
     build:
       context: .
+    ports:
+      - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
-    command: python manage.py runbot
-    restart: on-failure
-    volumes:
-      - ./:/api
+    command: pytest
 
-  migrations:  # Применение миграций
+#  ЭТОТ КОНТЕЙНЕР ОТКЛЮЧЕН, Т.К. НА УДАЛЁННОМ СЕРВЕРЕ ОН УЖЕ ЗАПУЩЕН
+#  bot:  # Бот Телеграм
+#    build:
+#      context: .
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#      migrations:
+#        condition: service_completed_successfully
+#    command: python manage.py runbot
+#    restart: on-failure
+#    volumes:
+#      - ./:/api
+
+  migrations:  # Миграции
     build:
       context: .
     depends_on:

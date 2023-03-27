@@ -17,6 +17,8 @@ social-auth-app-django = "^5.0.0"
 django-filter = "^22.1"
 pydantic = "^1.10.6"
 accessify = "^0.3.1"
+pytest-django = "^4.5.2"
+djangorestframework-simplejwt = "^5.2.2"
 
 
 [build-system]

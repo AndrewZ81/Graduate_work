@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
     # Сторонние приложения
     'rest_framework',
+    'rest_framework_simplejwt',
     'social_django',
     'drf_spectacular',
     'django_filters',
@@ -110,6 +111,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
